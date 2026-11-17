@@ -1,0 +1,148 @@
+---
+format: gfm
+execute:
+  echo: false
+---
+
+<!-- README.md is generated from this file. Edit README.qmd, then run
+     quarto render README.qmd. Every number comes from results/. CI checks
+     that README.md matches a fresh render. -->
+
+```{r}
+source("R/survival_helpers.R")
+source("R/ard_helpers.R")
+
+read_result <- function(file) read.csv(file.path("results", file))
+provenance <- yaml::read_yaml(file.path("results", "provenance.yaml"))
+
+attrition  <- read_result("m3_attrition_sql.csv")
+first_tx   <- read_result("m4_first_treatment.csv")
+tte        <- read_result("m4_tte_summary.csv")
+comparison <- read_result("m5_survival_comparison.csv")
+dq         <- read_result("m1_dq_checks.csv")
+ard_survival <- as.data.frame(arrow::read_parquet(file.path("results", "ard",
+                                                             "m6_survival_ard.parquet")))
+os <- survival_table_from_ard(ard_survival, survival_analyses[["overall"]])
+
+num <- function(x) format(x, big.mark = ",")
+p3 <- function(x) sprintf("%.3f", x)
+os_at <- function(years) {
+  row <- os[os$years == years, ]
+  paste0(p3(row$survival), " (95% CI ", p3(row$lower_95), " to ", p3(row$upper_95), ")")
+}
+groups <- aggregate(n_persons ~ FTRTCLS, data = first_tx, FUN = sum)
+groups <- groups[match(treatment_levels, groups$FTRTCLS), ]
+drug_duplicates <- dq[dq$check_name == "duplicate_records" & dq$table_name == "drug_exposure", ]
+```
+
+# OMOP breast cancer walkthrough
+
+Ignacio Garcia Ribelles
+
+This project shows, on synthetic data, the work of a real-world data analyst
+in oncology. A breast cancer cohort is extracted with SQL from data in the
+OMOP Common Data Model. Conditions and drugs are mapped to standard
+vocabularies, and every concept comes from a saved query. Analysis-ready
+datasets are built with a data dictionary that records their lineage.
+Survival is analysed with correct censoring. The results are stored as
+Analysis Results Data (ARD) and the report tables are built from them.
+Everything is tested and rebuilt by CI.
+
+All data are synthetic (Synthea). No clinical conclusion may be drawn from
+them.
+
+## Headline numbers
+
+Read from `results/` when this file is rendered. Dataset
+`` `r provenance$dataset` ``, OMOP CDM `r provenance$cdm_version`,
+vocabulary `r provenance$vocabulary_version`.
+
+- **Cohort.** `r num(tail(attrition$n_persons, 1))` people, out of
+  `r num(attrition$n_persons[1])` with any breast cancer record. They have a
+  first breast cancer record inside observation, at least 365 days of prior
+  observation and an age of 18 or over at index. The full attrition table is
+  in `results/m3_attrition_sql.csv`.
+- **Overall survival.** `r tte$n_events[tte$PARAMCD == "OS"]` deaths. Survival
+  is `r os_at(1)` at 1 year and `r os_at(5)` at 5 years.
+- **First treatment within 90 days.**
+  `r paste(paste0(groups$FTRTCLS, " ", groups$n_persons), collapse = ", ")`.
+- **Two routes to one estimate.** CohortSurvival and a hand-built
+  `survival::survfit` agree to 3 decimal places. The largest difference is
+  `r format(max(abs(comparison$difference)), digits = 1)`.
+- **Data quality.** `r sprintf("%.1f%%", 100 * drug_duplicates$share_failing)`
+  of drug records repeat another record with the same person, drug, start date
+  and type. They are reported, not removed.
+
+## How to run it
+
+You need R 4.4 or later and the [Quarto](https://quarto.org) command-line tool.
+
+1. Clone the repository and open R in its folder.
+2. Restore the packages with `renv::restore()`.
+3. Copy `.Renviron.example` to `.Renviron` and set `EUNOMIA_DATA_FOLDER` to
+   an absolute path. The data are downloaded there and never committed.
+4. Build everything and run the tests with `Rscript run_all.R`. The first run
+   downloads about 800 MB.
+5. Render the report with `quarto render report/report.qmd`.
+
+`Rscript tools/lint.R` lints the code. `Rscript
+tools/check_results_unchanged.R` checks that a rebuild gives the committed
+results. CI runs all of this on every push.
+
+## How it fits together
+
+``` mermaid
+flowchart LR
+  subgraph cdm["OMOP CDM in DuckDB"]
+    clinical["person, observation_period,<br/>condition_occurrence,<br/>drug_exposure, death"]
+    vocab["concept, concept_ancestor,<br/>concept_relationship"]
+  end
+  clinical --> dq["Data-quality checks<br/>sql/dq"]
+  vocab --> codelists["Concept sets<br/>codelists"]
+  clinical --> cohort["Cohort<br/>SQL and CohortConstructor"]
+  codelists --> cohort
+  cohort --> adam["adsl_like and adtte_like<br/>data-dictionary.yaml"]
+  adam --> analyses["Table 1, Kaplan-Meier,<br/>landmark analysis"]
+  analyses --> ard["Analysis Results Data<br/>results/ard"]
+  ard --> report["Report tables<br/>report/report.qmd"]
+```
+
+| Step | Milestone | Code |
+|----|----|----|
+| Row counts and data-quality checks | M1 | `sql/explore`, `sql/dq`, `R/10_explore_dq.R` |
+| Concept sets and mapping | M2 | `sql/codelists`, `R/20_codelists.R` |
+| Cohort, built twice | M3 | `sql/cohort`, `R/30_cohort.R` |
+| `adsl_like` and `adtte_like` | M4 | `sql/analysis`, `R/40_analysis_data.R`, `data-dictionary.yaml` |
+| Table 1, Kaplan-Meier, immortal-time bias | M5 | `R/50_analyses.R`, `R/survival_helpers.R` |
+| Analysis Results Data | M6 | `R/60_ard.R`, `R/ard_helpers.R` |
+| Provenance, lint and CI | M7 | `R/provenance.R`, `tools`, `.github/workflows/ci.yml` |
+
+Every results file carries the git commit and vocabulary version that produced
+it. The commit is the one checked out during the run, so committed results
+point to the commit before them.
+
+## Limitations
+
+- The data are synthetic. They come from one Synthea dataset and support no
+  clinical conclusion.
+- The cohort is small, and some treatment groups hold fewer than 10 people.
+  Estimates are imprecise.
+- Many observation periods start on the day of the breast cancer record. Those
+  people fail the 365-day rule, which removes most of the people with a record.
+- Chronic conditions appear to be recorded once, around onset. Comorbidity
+  flags therefore use all history before index, not a 365-day look-back.
+- The data contain no ICD-10 or ICD-10-CM codes. The ICD-10-CM mapping is shown
+  from the vocabulary alone.
+- Time to first treatment is censored at death. Death is really a competing
+  risk, so this is a simplification.
+- The datasets follow ADaM naming as a convention only. They are not
+  CDISC-conformant, and nothing here is validated.
+
+## Related
+
+[adam-admiral-walkthrough](https://github.com/Ngarciar24/adam-admiral-walkthrough)
+builds ADaM datasets from the public CDISC pilot SDTM data with `{admiral}`.
+
+## Licence
+
+MIT.

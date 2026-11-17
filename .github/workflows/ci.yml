@@ -1,6 +1,6 @@
 # Rebuild everything from the OMOP data on every push and pull request.
-# Lint, run the pipeline and its tests, check the committed results, render
-# the report. The report goes to GitHub Pages only from main, and only once
+# Lint, run the pipeline and its tests, check the committed results and the
+# README, render the report. The report goes to GitHub Pages only from main, and only once
 # the repository is public.
 
 name: CI
@@ -60,6 +60,13 @@ jobs:
         with:
           version: "1.11.9"
 
+      # README.md is rendered from README.qmd and its numbers come from
+      # results/. A fresh render must give the committed file.
+      - name: Check that README.md matches the results
+        run: |
+          quarto render README.qmd
+          git diff --exit-code README.md
+
       - name: Render the report
         run: |
           quarto render report/report.qmd
@@ -74,13 +81,13 @@ jobs:
           path: _site/index.html
 
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !github.event.repository.private
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !github.event.repository.private
         with:
           path: _site
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !github.event.repository.private
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !github.event.repository.private
     runs-on: ubuntu-24.04
     permissions:
       pages: write
