@@ -1,2 +1,2 @@
-"n_persons","n_periods","n_persons_with_more_than_one_period","n_zero_length_periods","min_length_days","median_length_days","max_length_days","earliest_start","latest_end"
-10751,10751,0,9,0,3325,33110,1925-01-13,2023-06-20
+"n_persons","n_periods","n_persons_with_more_than_one_period","n_zero_length_periods","min_length_days","median_length_days","max_length_days","earliest_start","latest_end","git_commit","vocabulary_version"
+10751,10751,0,9,0,3325,33110,1925-01-13,2023-06-20,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

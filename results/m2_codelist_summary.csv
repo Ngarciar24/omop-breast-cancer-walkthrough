@@ -1,9 +1,9 @@
-"codelist_name","class","n_concepts","n_flagged_for_review"
-"breast_cancer",NA,1949,770
-"treatment","anti_her2",583,NA
-"treatment","cdk46_inhibitor",243,NA
-"treatment","chemotherapy",13485,NA
-"treatment","endocrine_therapy",4909,NA
-"comorbidity","atrial_fibrillation",14,NA
-"comorbidity","cerebrovascular_disease",628,NA
-"comorbidity","ischaemic_heart_disease",201,NA
+"codelist_name","class","n_concepts","n_flagged_for_review","git_commit","vocabulary_version"
+"breast_cancer",NA,1949,770,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"treatment","anti_her2",583,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"treatment","cdk46_inhibitor",243,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"treatment","chemotherapy",13485,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"treatment","endocrine_therapy",4909,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"comorbidity","atrial_fibrillation",14,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"comorbidity","cerebrovascular_disease",628,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"comorbidity","ischaemic_heart_disease",201,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

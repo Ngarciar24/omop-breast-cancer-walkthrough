@@ -1,11 +1,11 @@
-"table_name","n_rows","n_persons"
-"condition_occurrence",4304,2861
-"death",751,751
-"device_exposure",1289,1081
-"drug_exposure",333336,10751
-"measurement",0,0
-"observation",0,0
-"observation_period",10751,10751
-"person",10751,10751
-"procedure_occurrence",25137,1933
-"visit_occurrence",242584,10751
+"table_name","n_rows","n_persons","git_commit","vocabulary_version"
+"condition_occurrence",4304,2861,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"death",751,751,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"device_exposure",1289,1081,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"drug_exposure",333336,10751,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"measurement",0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"observation",0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"observation_period",10751,10751,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"person",10751,10751,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"procedure_occurrence",25137,1933,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"visit_occurrence",242584,10751,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

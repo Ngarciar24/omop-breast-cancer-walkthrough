@@ -1,3 +1,3 @@
-"PARAMCD","n_persons","n_events","n_censored","median_aval_events","min_aval","max_aval"
-"OS",124,46,78,1091,39,16526
-"TTFT",124,100,24,17,6,16526
+"PARAMCD","n_persons","n_events","n_censored","median_aval_events","min_aval","max_aval","git_commit","vocabulary_version"
+"OS",124,46,78,1091,39,16526,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"TTFT",124,100,24,17,6,16526,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

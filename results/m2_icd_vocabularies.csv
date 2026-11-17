@@ -1,3 +1,3 @@
-"vocabulary_id","loaded","vocabulary_version","n_concepts","n_condition_records_in_data"
-"ICD10","no",NA,0,0
-"ICD10CM","yes","ICD10CM FY2022 code descriptions",97114,0
+"vocabulary_id","loaded","vocabulary_version","n_concepts","n_condition_records_in_data","git_commit"
+"ICD10","no","v5.0 22-JUN-22",0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4"
+"ICD10CM","yes","v5.0 22-JUN-22",97114,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4"

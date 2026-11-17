@@ -1,7 +1,7 @@
-"FTRTCLS","FTRTALL","n_persons"
-"Anti-HER2 based","anti_her2 + cdk46_inhibitor + endocrine_therapy",4
-"Anti-HER2 based","anti_her2 + endocrine_therapy",4
-"CDK4/6 inhibitor based","cdk46_inhibitor + endocrine_therapy",19
-"Chemotherapy","chemotherapy",57
-"Endocrine only","endocrine_therapy",15
-"None within 90 days",NA,25
+"FTRTCLS","FTRTALL","n_persons","git_commit","vocabulary_version"
+"Anti-HER2 based","anti_her2 + cdk46_inhibitor + endocrine_therapy",4,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"Anti-HER2 based","anti_her2 + endocrine_therapy",4,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"CDK4/6 inhibitor based","cdk46_inhibitor + endocrine_therapy",19,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"Chemotherapy","chemotherapy",57,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"Endocrine only","endocrine_therapy",15,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"None within 90 days",NA,25,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

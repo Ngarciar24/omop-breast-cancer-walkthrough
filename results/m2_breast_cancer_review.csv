@@ -1,4 +1,4 @@
-"review_reason","n_concepts"
-"lymphoma, melanoma or sarcoma",748
-"name does not mention the breast",2
-"secondary tumour in the breast",20
+"review_reason","n_concepts","git_commit","vocabulary_version"
+"lymphoma, melanoma or sarcoma",748,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"name does not mention the breast",2,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"secondary tumour in the breast",20,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

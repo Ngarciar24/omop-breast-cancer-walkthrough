@@ -1,3 +1,3 @@
-"table_name","source_vocabulary_id","standard_vocabulary_id","n_records","n_source_concepts","n_standard_concepts","n_source_equals_standard","n_confirmed_by_maps_to"
-"condition_occurrence","SNOMED","SNOMED",278,1,1,278,278
-"drug_exposure","RxNorm","RxNorm",732,16,16,732,732
+"table_name","source_vocabulary_id","standard_vocabulary_id","n_records","n_source_concepts","n_standard_concepts","n_source_equals_standard","n_confirmed_by_maps_to","git_commit","vocabulary_version"
+"condition_occurrence","SNOMED","SNOMED",278,1,1,278,278,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"drug_exposure","RxNorm","RxNorm",732,16,16,732,732,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

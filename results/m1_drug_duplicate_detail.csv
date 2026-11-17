@@ -1,2 +1,2 @@
-"n_duplicate_groups","max_rows_in_one_group","groups_differing_in_visit","groups_differing_in_end_date","groups_differing_in_start_time","groups_differing_in_quantity","groups_differing_in_source_value"
-92309,49,0,0,0,0,0
+"n_duplicate_groups","max_rows_in_one_group","groups_differing_in_visit","groups_differing_in_end_date","groups_differing_in_start_time","groups_differing_in_quantity","groups_differing_in_source_value","git_commit","vocabulary_version"
+92309,49,0,0,0,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

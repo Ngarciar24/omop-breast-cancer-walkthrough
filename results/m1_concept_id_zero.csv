@@ -1,8 +1,8 @@
-"table_name","concept_column","n_rows","n_concept_zero","share_concept_zero"
-"condition_occurrence","condition_concept_id",4304,0,0
-"device_exposure","device_concept_id",1289,0,0
-"drug_exposure","drug_concept_id",333336,0,0
-"measurement","measurement_concept_id",0,0,NA
-"observation","observation_concept_id",0,0,NA
-"procedure_occurrence","procedure_concept_id",25137,0,0
-"visit_occurrence","visit_concept_id",242584,0,0
+"table_name","concept_column","n_rows","n_concept_zero","share_concept_zero","git_commit","vocabulary_version"
+"condition_occurrence","condition_concept_id",4304,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"device_exposure","device_concept_id",1289,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"drug_exposure","drug_concept_id",333336,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"measurement","measurement_concept_id",0,0,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"observation","observation_concept_id",0,0,NA,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"procedure_occurrence","procedure_concept_id",25137,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+"visit_occurrence","visit_concept_id",242584,0,0,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"

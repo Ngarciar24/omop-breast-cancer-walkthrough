@@ -1,0 +1,17 @@
+git_commit: 6e917455e27c2b643c0c6f5b1bf66669d7b95dc4
+vocabulary_version: v5.0 22-JUN-22
+cdm_version: 5.3.1
+dataset: synthea-breast_cancer-10k
+source_description: Synthea Synthetic Data
+r_version: 4.6.1
+packages:
+  CDMConnector: 2.8.1
+  duckdb: 2.0.0
+  CodelistGenerator: 4.1.0
+  CohortConstructor: 0.6.3
+  PatientProfiles: 1.6.1
+  CohortSurvival: 1.2.1
+  survival: 3.8.12
+  cards: 0.9.0
+  cardx: 0.3.4
+run_date: '2026-11-17'

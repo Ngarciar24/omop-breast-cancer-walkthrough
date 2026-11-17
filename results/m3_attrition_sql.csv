@@ -1,6 +1,6 @@
-"step","description","n_persons","n_records"
-1,"Any breast cancer record",278,278
-2,"Record inside an observation period",278,278
-3,"First record per person (index date)",278,278
-4,"At least 365 days of prior observation",124,124
-5,"Age 18 or older at index",124,124
+"step","description","n_persons","n_records","git_commit","vocabulary_version"
+1,"Any breast cancer record",278,278,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+2,"Record inside an observation period",278,278,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+3,"First record per person (index date)",278,278,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+4,"At least 365 days of prior observation",124,124,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
+5,"Age 18 or older at index",124,124,"6e917455e27c2b643c0c6f5b1bf66669d7b95dc4","v5.0 22-JUN-22"
