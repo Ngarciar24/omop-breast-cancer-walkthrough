@@ -1,0 +1,5 @@
+"flag","parent_name","concept_id","concept_name","vocabulary_id","domain_id","concept_class_id","concept_code","include_descendants","vocabulary_version"
+"atrial_fibrillation","Atrial fibrillation",313217,"Atrial fibrillation","SNOMED","Condition","Clinical Finding","49436004",TRUE,"v5.0 22-JUN-22"
+"cerebrovascular_disease","Cerebrovascular disease",381591,"Cerebrovascular disease","SNOMED","Condition","Clinical Finding","62914000",TRUE,"v5.0 22-JUN-22"
+"ischaemic_heart_disease","Coronary arteriosclerosis",317576,"Coronary arteriosclerosis","SNOMED","Condition","Clinical Finding","53741008",TRUE,"v5.0 22-JUN-22"
+"ischaemic_heart_disease","Ischemic heart disease",4185932,"Ischemic heart disease","SNOMED","Condition","Clinical Finding","414545008",TRUE,"v5.0 22-JUN-22"

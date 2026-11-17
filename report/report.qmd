@@ -246,3 +246,210 @@ Median age at index is `r summary_value("age_at_index", "median")` years
 (range `r summary_value("age_at_index", "min")` to `r summary_value("age_at_index", "max")`).
 Index dates fall between `r summary_value("index_year", "min")` and
 `r summary_value("index_year", "max")`.
+
+## Analysis-ready datasets (M4)
+
+```{r}
+lookback    <- results("m4_comorbidity_lookback.csv")
+first_tx    <- results("m4_first_treatment.csv")
+tte         <- results("m4_tte_summary.csv")
+censoring   <- results("m4_censoring_reasons.csv")
+dictionary  <- yaml::read_yaml(file.path("..", "data-dictionary.yaml"))$datasets
+
+tte_value <- function(param, column) tte[[column]][tte$PARAMCD == param]
+```
+
+`adsl_like` has one row per person and `adtte_like` one row per person and
+parameter. They follow ADaM naming as a convention only. They are not
+CDISC-conformant datasets.
+
+### Comorbidity look-back
+
+The flags look at all available history before the index date. The plan was a
+365-day look-back. In this data a chronic condition appears to be recorded once,
+around onset, and rarely again at later visits. A short window therefore finds
+almost nobody, as the table shows.
+
+```{r}
+gt(lookback) |>
+  cols_label(flag = "Comorbidity", n_persons_all_history = "All history",
+             n_persons_365_days = "365 days before index")
+```
+
+### First treatment within 90 days
+
+When several classes start on the same first day, the highest in the order
+anti-HER2, CDK4/6 inhibitor, chemotherapy, endocrine decides the group.
+
+```{r}
+gt(first_tx) |>
+  cols_label(FTRTCLS = "First treatment group",
+             FTRTALL = "Classes started on that day", n_persons = "Persons") |>
+  sub_missing(missing_text = "")
+```
+
+### Time-to-event parameters
+
+`CNSR = 1` means censored and `0` means event.
+Overall survival has `r tte_value("OS", "n_events")` deaths among
+`r tte_value("OS", "n_persons")` people. Time to first treatment has
+`r tte_value("TTFT", "n_events")` events.
+`r sum(censoring$n_persons[censoring$PARAMCD == "TTFT" & censoring$CNSDTDSC == "DEATH"])`
+people die before any treatment and are censored at death. Death is really a
+competing risk for treatment. Censoring at death treats those people as if
+they could still have been treated later, which is a simplification.
+
+```{r}
+gt(tte) |>
+  cols_label(PARAMCD = "Parameter", n_persons = "Persons", n_events = "Events",
+             n_censored = "Censored", median_aval_events = "Median days to event",
+             min_aval = "Shortest (days)", max_aval = "Longest (days)") |>
+  fmt_integer(columns = -PARAMCD)
+```
+
+### Data dictionary
+
+Every variable, its type, derivation and sources. This is read from
+`data-dictionary.yaml`, which a test keeps in step with the datasets.
+
+```{r}
+dictionary_rows <- do.call(rbind, lapply(names(dictionary), function(dataset) {
+  do.call(rbind, lapply(dictionary[[dataset]]$variables, function(v) {
+    data.frame(
+      Dataset = dataset,
+      Variable = v$name,
+      Label = v$label,
+      Type = v$type,
+      Derivation = v$derivation,
+      Sources = paste(v$source_tables, collapse = ", "),
+      `Concept sets` = paste(v$concept_sets, collapse = ", "),
+      check.names = FALSE
+    )
+  }))
+}))
+gt(dictionary_rows, groupname_col = "Dataset")
+```
+
+## Analyses (M5)
+
+```{r}
+table1     <- results("m5_table1.csv")
+km_os      <- results("m5_km_os.csv")
+comparison <- results("m5_survival_comparison.csv")
+immortal   <- results("m5_immortal_time.csv")
+it_groups  <- results("m5_immortal_time_groups.csv")
+
+figure <- function(file) knitr::include_graphics(file.path("..", "results", "figures", file))
+
+it_value <- function(analysis, strata, years, column = "survival") {
+  immortal[[column]][immortal$analysis == analysis & immortal$strata == strata &
+                       immortal$years == years]
+}
+it_n <- function(analysis, strata) {
+  it_groups$n_persons[it_groups$analysis == analysis & it_groups$strata == strata]
+}
+naive <- "Naive, from index"
+landmark <- "Landmark at day 90, from day 90"
+p3 <- function(x) sprintf("%.3f", x)
+```
+
+Everything in this section is descriptive. The data are synthetic and support
+no clinical conclusion. The groups are small, so the estimates are imprecise.
+
+### Table 1 by first treatment group
+
+Median (25th, 75th percentile) for numbers, n (%) for categories.
+
+```{r}
+gt(table1) |>
+  sub_missing(missing_text = "")
+```
+
+### Overall survival
+
+```{r}
+#| fig-alt: "Kaplan-Meier curve of overall survival for all people, with numbers at risk"
+figure("m5_km_os_overall.png")
+```
+
+```{r}
+#| fig-alt: "Kaplan-Meier curves of overall survival by first treatment group, with numbers at risk"
+figure("m5_km_os_by_treatment.png")
+```
+
+```{r}
+gt(km_os[, c("strata", "years", "n_risk", "survival", "lower_95", "upper_95")]) |>
+  cols_label(strata = "Group", years = "Years", n_risk = "At risk",
+             survival = "Survival", lower_95 = "Lower 95% CI",
+             upper_95 = "Upper 95% CI") |>
+  fmt_number(columns = c(survival, lower_95, upper_95), decimals = 3) |>
+  sub_missing(missing_text = "")
+```
+
+### Two ways to the same estimate
+
+The overall survival curve is estimated twice. Once with CohortSurvival on the
+CohortConstructor cohort and a death cohort, and once with `survival::survfit`
+on `adtte_like`. A test checks that they agree to 3 decimal places.
+CohortSurvival reports its estimates rounded to 4 decimals.
+
+```{r}
+gt(comparison) |>
+  cols_label(time_days = "Day", survfit = "survfit",
+             cohort_survival = "CohortSurvival", difference = "Difference") |>
+  fmt_number(columns = c(survfit, cohort_survival), decimals = 4) |>
+  fmt_scientific(columns = difference, decimals = 1)
+```
+
+### Immortal-time bias
+
+**The naive comparison.** Group people by whether they were ever treated during
+follow-up, and compare survival from the index date. This looks natural, but it
+is biased. To land in the "ever treated" group a person has to be alive on the
+day treatment starts. The days between diagnosis and treatment are "immortal"
+for that group, since nobody in it can die during them. A person who dies early,
+before treatment could start, lands in "never treated". The bias makes the
+treated group look better than it is.
+
+**The landmark analysis.** Pick a landmark day, here day 90. Keep only people
+still alive and under observation after day 90. Group them by what they had
+received by day 90, and start the clock on day 90 for everyone. Group membership
+is now fixed before follow-up starts, so no one has immortal time. The price is
+that people who die or leave observation before day 90 drop out, and treatment
+started after day 90 counts as no treatment. Treating the start of treatment as
+a time-varying covariate is the other standard fix. It is not done here.
+
+```{r}
+#| fig-alt: "Kaplan-Meier curves of overall survival, ever against never treated, from index"
+figure("m5_os_naive.png")
+```
+
+```{r}
+#| fig-alt: "Kaplan-Meier curves of overall survival, treated by day 90 or not, from day 90"
+figure("m5_os_landmark.png")
+```
+
+```{r}
+gt(immortal[, c("analysis", "strata", "years", "n_risk", "survival",
+                "lower_95", "upper_95")], groupname_col = "analysis") |>
+  cols_label(strata = "Group", years = "Years", n_risk = "At risk",
+             survival = "Survival", lower_95 = "Lower 95% CI",
+             upper_95 = "Upper 95% CI") |>
+  fmt_number(columns = c(survival, lower_95, upper_95), decimals = 3)
+```
+
+**What this data shows.** Here the textbook pattern does not appear. In the
+naive comparison the `r it_n(naive, "Never treated")` never-treated people have
+2-year survival of `r p3(it_value(naive, "Never treated", 2))`, against
+`r p3(it_value(naive, "Ever treated", 2))` for the
+`r it_n(naive, "Ever treated")` ever-treated people. The landmark changes the
+treated group's 2-year survival only from
+`r p3(it_value(naive, "Ever treated", 2))` to
+`r p3(it_value(landmark, "Treated by day 90", 2))`. The bias is small in this
+data for two reasons. Treatment starts soon after diagnosis, with a median of
+`r tte_value("TTFT", "median_aval_events")` days. And only
+`r it_n(naive, "Ever treated") + it_n(naive, "Never treated") - it_n(landmark, "Treated by day 90") - it_n(landmark, "Not treated by day 90")`
+people die or leave observation within the first 90 days, so there is little
+immortal time to misclassify. The people never treated in this synthetic data
+also differ from the treated in ways the data do not describe, so the groups
+are not comparable in either analysis.

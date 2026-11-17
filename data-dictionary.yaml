@@ -1,0 +1,195 @@
+# Data dictionary for the analysis-ready datasets
+#
+# Every variable of adsl_like and adtte_like, with its label, type,
+# derivation, source tables and concept sets. This is the lineage record.
+# A test checks that this file and the datasets list the same variables.
+#
+# The names follow ADaM as a convention only. These are not CDISC-conformant
+# datasets.
+#
+# type is one of character, integer, date.
+
+datasets:
+
+  adsl_like:
+    description: One row per person in the breast cancer cohort.
+    program: sql/analysis/adsl_like.sql
+    variables:
+      - name: USUBJID
+        label: Person identifier
+        type: character
+        derivation: person_id as text.
+        source_tables: [breast_cancer_sql]
+        concept_sets: []
+      - name: SEX
+        label: Sex
+        type: character
+        derivation: F or M from the label of gender_concept_id, U if missing.
+        source_tables: [person, concept]
+        concept_sets: []
+      - name: AGE
+        label: Age at index
+        type: integer
+        derivation: Completed years from birth date to INDEXDT. A missing birth month or day is set to 1.
+        source_tables: [person]
+        concept_sets: []
+      - name: AGEU
+        label: Age unit
+        type: character
+        derivation: Always YEARS.
+        source_tables: []
+        concept_sets: []
+      - name: AGEGR1
+        label: Age group at index
+        type: character
+        derivation: AGE grouped as <50, 50-64, 65-74, >=75.
+        source_tables: []
+        concept_sets: []
+      - name: INDEXDT
+        label: Index date
+        type: date
+        derivation: Date of the first breast cancer record inside an observation period (M3 cohort start).
+        source_tables: [condition_occurrence, observation_period]
+        concept_sets: [breast_cancer]
+      - name: OBSSTDT
+        label: Start of observation period
+        type: date
+        derivation: Start of the observation period that contains INDEXDT.
+        source_tables: [observation_period]
+        concept_sets: []
+      - name: OBSENDDT
+        label: End of observation period
+        type: date
+        derivation: End of the observation period that contains INDEXDT (M3 cohort end).
+        source_tables: [observation_period]
+        concept_sets: []
+      - name: PRIOROBS
+        label: Days of observation before index
+        type: integer
+        derivation: INDEXDT minus OBSSTDT, in days.
+        source_tables: [observation_period]
+        concept_sets: []
+      - name: DTHFL
+        label: Death within follow-up flag
+        type: character
+        derivation: Y if a death date falls between INDEXDT and OBSENDDT, otherwise N.
+        source_tables: [death]
+        concept_sets: []
+      - name: DTHDT
+        label: Date of death within follow-up
+        type: date
+        derivation: Death date when DTHFL is Y, otherwise missing.
+        source_tables: [death]
+        concept_sets: []
+      - name: CMIHDFL
+        label: Ischaemic heart disease before index flag
+        type: character
+        derivation: Y if any condition record from the set starts before INDEXDT, in all available history, otherwise N.
+        source_tables: [condition_occurrence]
+        concept_sets: [comorbidity (ischaemic_heart_disease)]
+      - name: CMCVDFL
+        label: Cerebrovascular disease before index flag
+        type: character
+        derivation: Y if any condition record from the set starts before INDEXDT, in all available history, otherwise N.
+        source_tables: [condition_occurrence]
+        concept_sets: [comorbidity (cerebrovascular_disease)]
+      - name: CMAFFL
+        label: Atrial fibrillation before index flag
+        type: character
+        derivation: Y if any condition record from the set starts before INDEXDT, in all available history, otherwise N.
+        source_tables: [condition_occurrence]
+        concept_sets: [comorbidity (atrial_fibrillation)]
+      - name: FTRTFL
+        label: Treated within 90 days flag
+        type: character
+        derivation: Y if any treatment record from the sets starts between INDEXDT and INDEXDT + 90 days, otherwise N.
+        source_tables: [drug_exposure]
+        concept_sets: [treatment]
+      - name: FTRTDT
+        label: First treatment date within 90 days
+        type: date
+        derivation: Earliest treatment start between INDEXDT and INDEXDT + 90 days. Missing when FTRTFL is N.
+        source_tables: [drug_exposure]
+        concept_sets: [treatment]
+      - name: FTRTALL
+        label: All treatment classes started on FTRTDT
+        type: character
+        derivation: Every class with a record starting on FTRTDT, in alphabetical order, joined with " + ". Missing when FTRTFL is N.
+        source_tables: [drug_exposure]
+        concept_sets: [treatment]
+      - name: FTRTCLS
+        label: First treatment class within 90 days
+        type: character
+        derivation: >-
+          The highest class in FTRTALL, in the order anti-HER2, CDK4/6 inhibitor,
+          chemotherapy, endocrine. Labelled Anti-HER2 based, CDK4/6 inhibitor based,
+          Chemotherapy or Endocrine only. None within 90 days when FTRTFL is N.
+        source_tables: [drug_exposure]
+        concept_sets: [treatment]
+
+  adtte_like:
+    description: One row per person and time-to-event parameter (OS, TTFT).
+    program: sql/analysis/adtte_like.sql
+    variables:
+      - name: USUBJID
+        label: Person identifier
+        type: character
+        derivation: From adsl_like.
+        source_tables: [adsl_like]
+        concept_sets: []
+      - name: PARAMCD
+        label: Parameter code
+        type: character
+        derivation: OS (overall survival) or TTFT (time to first treatment).
+        source_tables: []
+        concept_sets: []
+      - name: PARAM
+        label: Parameter
+        type: character
+        derivation: Description of PARAMCD.
+        source_tables: []
+        concept_sets: []
+      - name: STARTDT
+        label: Time-to-event origin
+        type: date
+        derivation: INDEXDT from adsl_like.
+        source_tables: [adsl_like]
+        concept_sets: []
+      - name: ADT
+        label: Date of event or censoring
+        type: date
+        derivation: >-
+          OS uses DTHDT for an event, otherwise OBSENDDT. TTFT uses the first treatment
+          start on or after INDEXDT for an event, otherwise the earlier of DTHDT and OBSENDDT.
+        source_tables: [adsl_like, drug_exposure]
+        concept_sets: [treatment]
+      - name: AVAL
+        label: Time to event or censoring
+        type: integer
+        derivation: ADT minus STARTDT, in days.
+        source_tables: []
+        concept_sets: []
+      - name: AVALU
+        label: Unit of AVAL
+        type: character
+        derivation: Always DAYS.
+        source_tables: []
+        concept_sets: []
+      - name: CNSR
+        label: Censoring indicator
+        type: integer
+        derivation: 0 for an event, 1 for censored (ADaM convention).
+        source_tables: []
+        concept_sets: []
+      - name: EVNTDESC
+        label: Event description
+        type: character
+        derivation: DEATH (OS) or FIRST TREATMENT (TTFT) for events. Missing when censored.
+        source_tables: []
+        concept_sets: []
+      - name: CNSDTDSC
+        label: Censoring reason
+        type: character
+        derivation: END OF OBSERVATION, or DEATH for TTFT censored at death. Missing for events.
+        source_tables: []
+        concept_sets: []

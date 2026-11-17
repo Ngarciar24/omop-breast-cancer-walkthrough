@@ -1,0 +1,7 @@
+"FTRTCLS","FTRTALL","n_persons"
+"Anti-HER2 based","anti_her2 + cdk46_inhibitor + endocrine_therapy",4
+"Anti-HER2 based","anti_her2 + endocrine_therapy",4
+"CDK4/6 inhibitor based","cdk46_inhibitor + endocrine_therapy",19
+"Chemotherapy","chemotherapy",57
+"Endocrine only","endocrine_therapy",15
+"None within 90 days",NA,25

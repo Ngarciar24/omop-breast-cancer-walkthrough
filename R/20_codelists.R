@@ -5,7 +5,8 @@
 # map to standard concepts. Run from run_all.R, which has already opened `cdm`.
 #
 # No concept_id is typed in this file or in the SQL. The breast cancer parent
-# is found by name, the drug ingredients are found by the names in
+# and the comorbidity parents (used in M4) are found by name, the drug
+# ingredients are found by the names in
 # codelists/treatment_classes_input.csv, and everything else follows from
 # concept_ancestor and concept_relationship.
 # ---------------------------------------------------------------------------
@@ -41,18 +42,31 @@ if (length(not_found) > 0) {
           paste(not_found, collapse = ", "))
 }
 
+# --- Comorbidity parents (used in M4) -------------------------------------
+comorbidity_input <- read.csv("codelists/comorbidity_input.csv")
+write_temp("comorbidity_input", comorbidity_input)
+comorbidity_parents <- run_sql_file(con, "sql/codelists/condition_parents.sql")
+if (anyNA(comorbidity_parents$concept_id)) {
+  stop("No standard SNOMED condition found for: ",
+       paste(comorbidity_parents$parent_name[is.na(comorbidity_parents$concept_id)],
+             collapse = ", "))
+}
+
 # --- Descendants ----------------------------------------------------------
 found <- ingredients[!is.na(ingredients$concept_id), ]
 write_temp("codelist_ancestors", rbind(
   data.frame(codelist_name = "breast_cancer", class = NA_character_,
              ancestor_concept_id = breast_cancer_parent$concept_id),
   data.frame(codelist_name = "treatment", class = found$class,
-             ancestor_concept_id = found$concept_id)
+             ancestor_concept_id = found$concept_id),
+  data.frame(codelist_name = "comorbidity", class = comorbidity_parents$flag,
+             ancestor_concept_id = comorbidity_parents$concept_id)
 ))
 descendants <- run_sql_file(con, "sql/codelists/descendants.sql")
 
 breast_cancer <- descendants[descendants$codelist_name == "breast_cancer", ]
 treatment <- descendants[descendants$codelist_name == "treatment", ]
+comorbidity <- descendants[descendants$codelist_name == "comorbidity", ]
 
 # --- Flag breast cancer concepts for review -------------------------------
 # The SNOMED hierarchy puts some concepts under "Malignant tumor of breast"
@@ -136,6 +150,20 @@ write.csv(
   codelist_file(icd10cm_map, names(icd10cm_map)),
   "codelists/breast_cancer_icd10cm_map.csv", row.names = FALSE
 )
+write.csv(
+  codelist_file(cbind(comorbidity_parents, include_descendants = TRUE),
+                c("flag", "parent_name", "concept_id", "concept_name",
+                  "vocabulary_id", "domain_id", "concept_class_id",
+                  "concept_code", "include_descendants")),
+  "codelists/comorbidity_definition.csv", row.names = FALSE
+)
+write.csv(
+  codelist_file(comorbidity,
+                c("class", "ancestor_concept_id", "concept_id", "concept_name",
+                  "vocabulary_id", "domain_id", "concept_class_id",
+                  "concept_code")),
+  "codelists/comorbidity.csv", row.names = FALSE
+)
 
 # --- Save results ---------------------------------------------------------
 codelist_summary <- rbind(
@@ -144,6 +172,10 @@ codelist_summary <- rbind(
              n_flagged_for_review = sum(breast_cancer$review_reason != "")),
   do.call(rbind, lapply(split(treatment, treatment$class), function(x) {
     data.frame(codelist_name = "treatment", class = x$class[1],
+               n_concepts = nrow(x), n_flagged_for_review = NA_integer_)
+  })),
+  do.call(rbind, lapply(split(comorbidity, comorbidity$class), function(x) {
+    data.frame(codelist_name = "comorbidity", class = x$class[1],
                n_concepts = nrow(x), n_flagged_for_review = NA_integer_)
   }))
 )

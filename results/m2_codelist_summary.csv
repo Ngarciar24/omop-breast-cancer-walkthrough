@@ -4,3 +4,6 @@
 "treatment","cdk46_inhibitor",243,NA
 "treatment","chemotherapy",13485,NA
 "treatment","endocrine_therapy",4909,NA
+"comorbidity","atrial_fibrillation",14,NA
+"comorbidity","cerebrovascular_disease",628,NA
+"comorbidity","ischaemic_heart_disease",201,NA

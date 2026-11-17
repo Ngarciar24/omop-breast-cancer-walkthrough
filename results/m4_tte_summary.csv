@@ -1,0 +1,3 @@
+"PARAMCD","n_persons","n_events","n_censored","median_aval_events","min_aval","max_aval"
+"OS",124,46,78,1091,39,16526
+"TTFT",124,100,24,17,6,16526

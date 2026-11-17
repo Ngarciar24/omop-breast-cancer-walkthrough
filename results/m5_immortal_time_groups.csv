@@ -1,0 +1,5 @@
+"analysis","strata","n_persons"
+"Naive, from index","Ever treated",100
+"Naive, from index","Never treated",24
+"Landmark at day 90, from day 90","Not treated by day 90",24
+"Landmark at day 90, from day 90","Treated by day 90",98
