@@ -1,0 +1,9 @@
+linters: lintr::linters_with_defaults(
+    line_length_linter = lintr::line_length_linter(100L),
+    object_name_linter = lintr::object_name_linter(styles = c("snake_case", "UPPERCASE", "symbols")),
+    object_usage_linter = NULL
+  )
+encoding: "UTF-8"
+# object_usage_linter is off. It checks one file at a time, so in this project
+# of sourced scripts it reports every function defined in another file, and
+# every column name used inside cards and ggplot2 code, as undefined.

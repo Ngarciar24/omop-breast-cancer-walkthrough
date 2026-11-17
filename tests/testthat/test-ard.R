@@ -45,7 +45,11 @@ test_that("every number in Table 1 equals the ARD value it came from", {
     levels <- if (variable %in% table1_categorical) {
       row <- row + 1  # the label row has no numbers
       unique(ard$variable_level[ard$variable == variable])
-    } else if (variable %in% table1_flags) "Y" else NA
+    } else if (variable %in% table1_flags) {
+      "Y"
+    } else {
+      NA
+    }
     for (level in levels) {
       row <- row + 1
       for (g in seq_along(groups)) {

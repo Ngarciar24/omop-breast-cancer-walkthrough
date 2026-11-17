@@ -25,3 +25,7 @@ data/
 report/_site/
 report/*_files/
 report/.quarto/
+
+# Rendered report and site, built by CI
+report/report.html
+_site/

@@ -53,10 +53,10 @@ censoring_reasons <- as.data.frame(
 )
 censoring_reasons <- censoring_reasons[censoring_reasons$n_persons > 0, ]
 
-write.csv(comorbidity_lookback, "results/m4_comorbidity_lookback.csv", row.names = FALSE)
-write.csv(first_treatment, "results/m4_first_treatment.csv", row.names = FALSE)
-write.csv(tte_summary, "results/m4_tte_summary.csv", row.names = FALSE)
-write.csv(censoring_reasons, "results/m4_censoring_reasons.csv", row.names = FALSE)
+write_result(comorbidity_lookback, "results/m4_comorbidity_lookback.csv")
+write_result(first_treatment, "results/m4_first_treatment.csv")
+write_result(tte_summary, "results/m4_tte_summary.csv")
+write_result(censoring_reasons, "results/m4_censoring_reasons.csv")
 
 message("\nadsl_like: ", nrow(adsl_like), " rows, adtte_like: ", nrow(adtte_like), " rows")
 message("\nComorbidity look-back")

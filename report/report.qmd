@@ -1,18 +1,26 @@
 ---
 title: "OMOP breast cancer walkthrough"
 author: "Ignacio Garcia Ribelles"
-format: html
+format:
+  html:
+    embed-resources: true
 execute:
   echo: false
 ---
 
-The report is filled in milestone by milestone. All data are synthetic (Synthea).
-No clinical conclusion may be drawn from them.
+All data are synthetic (Synthea). No clinical conclusion may be drawn from them.
 
 ```{r}
 library(gt)
 
-results <- function(file) read.csv(file.path("..", "results", file))
+provenance <- yaml::read_yaml(file.path("..", "results", "provenance.yaml"))
+
+# Every results file carries git_commit and vocabulary_version. The header
+# below shows them once, so the tables leave those two columns out.
+results <- function(file) {
+  data <- read.csv(file.path("..", "results", file))
+  data[, setdiff(names(data), c("git_commit", "vocabulary_version")), drop = FALSE]
+}
 
 row_counts  <- results("m1_row_counts.csv")
 obs_periods <- results("m1_observation_periods.csv")
@@ -29,6 +37,14 @@ share <- function(check, table) {
 }
 pct <- function(x) sprintf("%.1f%%", 100 * x)
 num <- function(x) format(x, big.mark = ",")
+```
+
+```{r}
+gt(data.frame(
+  Item = c("Git commit", "Vocabulary version", "CDM version", "Dataset", "Run date"),
+  Value = c(provenance$git_commit, provenance$vocabulary_version,
+            provenance$cdm_version, provenance$dataset, provenance$run_date)
+))
 ```
 
 ## Data exploration and quality (M1)
@@ -339,7 +355,8 @@ source(file.path("..", "R", "survival_helpers.R"))
 source(file.path("..", "R", "ard_helpers.R"))
 
 read_ard <- function(file) {
-  as.data.frame(arrow::read_parquet(file.path("..", "results", "ard", file)))
+  data <- as.data.frame(arrow::read_parquet(file.path("..", "results", "ard", file)))
+  data[, setdiff(names(data), c("git_commit", "vocabulary_version")), drop = FALSE]
 }
 ard_table1   <- read_ard("m6_table1_ard.parquet")
 ard_survival <- read_ard("m6_survival_ard.parquet")

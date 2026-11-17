@@ -35,11 +35,11 @@ dq_checks <- run_dq_checks(con, "sql/dq")
 drug_duplicate_detail <- run_sql_file(con, "sql/explore/drug_duplicate_detail.sql")
 
 # --- Save and print -------------------------------------------------------
-write.csv(row_counts, "results/m1_row_counts.csv", row.names = FALSE)
-write.csv(observation_periods, "results/m1_observation_periods.csv", row.names = FALSE)
-write.csv(concept_id_zero, "results/m1_concept_id_zero.csv", row.names = FALSE)
-write.csv(dq_checks, "results/m1_dq_checks.csv", row.names = FALSE)
-write.csv(drug_duplicate_detail, "results/m1_drug_duplicate_detail.csv", row.names = FALSE)
+write_result(row_counts, "results/m1_row_counts.csv")
+write_result(observation_periods, "results/m1_observation_periods.csv")
+write_result(concept_id_zero, "results/m1_concept_id_zero.csv")
+write_result(dq_checks, "results/m1_dq_checks.csv")
+write_result(drug_duplicate_detail, "results/m1_drug_duplicate_detail.csv")
 
 message("\nRow counts")
 print(row_counts, row.names = FALSE)

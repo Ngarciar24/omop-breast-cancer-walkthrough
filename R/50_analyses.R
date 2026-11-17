@@ -22,12 +22,16 @@ adsl <- DBI::dbReadTable(con, "adsl_like")
 adtte <- DBI::dbReadTable(con, "adtte_like")
 fits <- os_fits(adsl, adtte, landmark_day = 90)
 
+# Every figure carries the commit and vocabulary version in its caption.
+stamp <- provenance_caption()
+
 # --- 1. Kaplan-Meier figures ----------------------------------------------
 ggsave("results/figures/m5_km_os_overall.png",
-       km_plot(fits$overall, "Overall survival, all people"),
+       km_plot(fits$overall, "Overall survival, all people", caption = stamp),
        width = 8, height = 5.5, dpi = 150, bg = "white")
 ggsave("results/figures/m5_km_os_by_treatment.png",
-       km_plot(fits$by_treatment, "Overall survival by first treatment group"),
+       km_plot(fits$by_treatment, "Overall survival by first treatment group",
+               caption = stamp),
        width = 8, height = 7, dpi = 150, bg = "white")
 
 # --- 2. CohortSurvival against our own survfit ----------------------------
@@ -58,15 +62,16 @@ survival_comparison <- data.frame(
 )
 survival_comparison$difference <- survival_comparison$survfit -
   survival_comparison$cohort_survival
-write.csv(survival_comparison, "results/m5_survival_comparison.csv", row.names = FALSE)
+write_result(survival_comparison, "results/m5_survival_comparison.csv")
 
 # --- 3. Immortal-time bias figures ----------------------------------------
 ggsave("results/figures/m5_os_naive.png",
-       km_plot(fits$naive, "Naive: ever against never treated, from index"),
+       km_plot(fits$naive, "Naive: ever against never treated, from index",
+               caption = stamp),
        width = 8, height = 5.5, dpi = 150, bg = "white")
 ggsave("results/figures/m5_os_landmark.png",
        km_plot(fits$landmark, "Landmark: treated by day 90 or not, from day 90",
-               x_label = "Years from day 90"),
+               x_label = "Years from day 90", caption = stamp),
        width = 8, height = 5.5, dpi = 150, bg = "white")
 
 message("\nCohortSurvival against survfit")

@@ -183,14 +183,13 @@ review_summary <- as.data.frame(table(
   review_reason = breast_cancer$review_reason[breast_cancer$review_reason != ""]
 ), responseName = "n_concepts")
 
-write.csv(codelist_summary, "results/m2_codelist_summary.csv", row.names = FALSE)
-write.csv(review_summary, "results/m2_breast_cancer_review.csv", row.names = FALSE)
-write.csv(breast_cancer_counts, "results/m2_breast_cancer_counts.csv", row.names = FALSE)
-write.csv(treatment_counts, "results/m2_treatment_counts.csv", row.names = FALSE)
-write.csv(source_to_standard, "results/m2_source_to_standard.csv", row.names = FALSE)
-write.csv(icd_vocabularies, "results/m2_icd_vocabularies.csv", row.names = FALSE)
-write.csv(data.frame(ingredient_name = not_found), "results/m2_ingredients_not_found.csv",
-          row.names = FALSE)
+write_result(codelist_summary, "results/m2_codelist_summary.csv")
+write_result(review_summary, "results/m2_breast_cancer_review.csv")
+write_result(breast_cancer_counts, "results/m2_breast_cancer_counts.csv")
+write_result(treatment_counts, "results/m2_treatment_counts.csv")
+write_result(source_to_standard, "results/m2_source_to_standard.csv")
+write_result(icd_vocabularies, "results/m2_icd_vocabularies.csv")
+write_result(data.frame(ingredient_name = not_found), "results/m2_ingredients_not_found.csv")
 
 message("\nCodelists")
 print(codelist_summary, row.names = FALSE)

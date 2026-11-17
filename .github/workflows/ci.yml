@@ -1,0 +1,93 @@
+# Rebuild everything from the OMOP data on every push and pull request.
+# Lint, run the pipeline and its tests, check the committed results, render
+# the report. The report goes to GitHub Pages only from main, and only once
+# the repository is public.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      EUNOMIA_DATA_FOLDER: ${{ github.workspace }}/data/eunomia
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Keep r-version equal to the R version in renv.lock. A test checks it.
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.1"
+          use-public-rspm: true
+
+      # Restores the packages in renv.lock and caches them between runs.
+      - uses: r-lib/actions/setup-renv@v2
+
+      # The built DuckDB file depends on the duckdb package version, so that
+      # version is part of the cache key. The first run downloads 802 MB.
+      - name: Read the duckdb version for the dataset cache key
+        id: dataset
+        run: echo "duckdb=$(jq -r '.Packages.duckdb.Version' renv.lock)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: data/eunomia/*.duckdb
+          key: synthea-breast_cancer-10k-cdm5.3-duckdb-${{ steps.dataset.outputs.duckdb }}
+
+      - name: Point R at the dataset folder
+        run: |
+          mkdir -p data/eunomia
+          echo "EUNOMIA_DATA_FOLDER=${EUNOMIA_DATA_FOLDER}" > .Renviron
+
+      - name: Lint
+        run: Rscript tools/lint.R
+
+      - name: Build every step and run the tests
+        run: Rscript run_all.R
+
+      - name: Check that results match the committed versions
+        run: Rscript tools/check_results_unchanged.R
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: "1.11.9"
+
+      - name: Render the report
+        run: |
+          quarto render report/report.qmd
+          mkdir -p _site
+          cp report/report.html _site/index.html
+
+      # Always kept as a build artifact, so the report can be read while the
+      # repository is still private.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !github.event.repository.private
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !github.event.repository.private
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -95,12 +95,14 @@ flatten_ard <- function(ard) {
   if (length(errors) > 0) stop("cards recorded errors: ", paste(unlist(errors), collapse = "; "))
 
   as_text <- function(column) {
-    vapply(column, function(v) if (is.null(v) || length(v) == 0) NA_character_ else
-      as.character(v)[1], character(1))
+    vapply(column, function(v) {
+      if (is.null(v) || length(v) == 0) NA_character_ else as.character(v)[1]
+    }, character(1))
   }
   as_number <- function(column) {
-    vapply(column, function(v) if (is.numeric(v) && length(v) == 1) as.numeric(v) else
-      NA_real_, numeric(1))
+    vapply(column, function(v) {
+      if (is.numeric(v) && length(v) == 1) as.numeric(v) else NA_real_
+    }, numeric(1))
   }
   stat_fmt <- if ("stat_fmt" %in% names(ard)) as_text(ard$stat_fmt) else as_text(ard$stat)
 
@@ -149,14 +151,18 @@ table1_from_ard <- function(ard) {
   headers <- paste0(c("Overall", treatment_levels), " N = ", group_n)
 
   cells <- function(make_cell) vapply(groups, make_cell, character(1))
-  continuous_cell <- function(variable) function(g) {
-    paste0(ard_value(ard, g, variable, "median"), " (",
-           ard_value(ard, g, variable, "p25"), ", ",
-           ard_value(ard, g, variable, "p75"), ")")
+  continuous_cell <- function(variable) {
+    function(g) {
+      paste0(ard_value(ard, g, variable, "median"), " (",
+             ard_value(ard, g, variable, "p25"), ", ",
+             ard_value(ard, g, variable, "p75"), ")")
+    }
   }
-  count_cell <- function(variable, level) function(g) {
-    paste0(ard_value(ard, g, variable, "n", level), " (",
-           ard_value(ard, g, variable, "p", level), "%)")
+  count_cell <- function(variable, level) {
+    function(g) {
+      paste0(ard_value(ard, g, variable, "n", level), " (",
+             ard_value(ard, g, variable, "p", level), "%)")
+    }
   }
 
   rows <- list()

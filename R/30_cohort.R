@@ -11,8 +11,8 @@
 #   End date     end of the observation period that contains the index date
 #   Sex          recorded, not filtered on
 #
-# Both cohort tables stay in the DuckDB working copy. Only counts go to
-# results/.
+# Both cohort tables stay in the DuckDB working copy. Only counts go to the
+# results folder.
 # ---------------------------------------------------------------------------
 
 library(CohortConstructor)
@@ -73,9 +73,9 @@ cohort_summary <- rbind(
                        sum(too_short$prior_observation_days == 0)))
 )
 
-write.csv(cohort_sql$attrition, "results/m3_attrition_sql.csv", row.names = FALSE)
-write.csv(attrition_cc, "results/m3_attrition_cohortconstructor.csv", row.names = FALSE)
-write.csv(cohort_summary, "results/m3_cohort_summary.csv", row.names = FALSE)
+write_result(cohort_sql$attrition, "results/m3_attrition_sql.csv")
+write_result(attrition_cc, "results/m3_attrition_cohortconstructor.csv")
+write_result(cohort_summary, "results/m3_cohort_summary.csv")
 
 message("\nAttrition (SQL)")
 print(cohort_sql$attrition, row.names = FALSE)

@@ -117,7 +117,8 @@ test_that("M1 results have the expected columns and valid shares", {
 
   dq <- read.csv(dq_file)
   expect_named(dq, c("check_name", "rule", "table_name", "rows_checked",
-                     "rows_failing", "share_failing"))
+                     "rows_failing", "share_failing",
+                     "git_commit", "vocabulary_version"))
   expect_true(all(dq$rows_failing <= dq$rows_checked))
   expect_true(all(dq$share_failing >= 0 & dq$share_failing <= 1, na.rm = TRUE))
 

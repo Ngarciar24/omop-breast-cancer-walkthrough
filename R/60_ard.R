@@ -28,10 +28,10 @@ fits <- os_fits(adsl, adtte, landmark_day = 90)
 ard_survival <- survival_ard(fits, times_days = c(0, 1, 2, 3, 5, 10) * days_per_year)
 
 # --- Save -----------------------------------------------------------------
-arrow::write_parquet(ard_table1, "results/ard/m6_table1_ard.parquet")
-write.csv(ard_table1, "results/ard/m6_table1_ard.csv", row.names = FALSE)
-arrow::write_parquet(ard_survival, "results/ard/m6_survival_ard.parquet")
-write.csv(ard_survival, "results/ard/m6_survival_ard.csv", row.names = FALSE)
+write_result(ard_table1, "results/ard/m6_table1_ard.parquet")
+write_result(ard_table1, "results/ard/m6_table1_ard.csv")
+write_result(ard_survival, "results/ard/m6_survival_ard.parquet")
+write_result(ard_survival, "results/ard/m6_survival_ard.csv")
 
 message("\nARD rows: Table 1 ", nrow(ard_table1), ", survival ", nrow(ard_survival))
 print(table1_from_ard(ard_table1), row.names = FALSE)

@@ -53,7 +53,7 @@ landmark_data <- function(adsl, adtte, day = 90) {
 }
 
 # Kaplan-Meier figure with numbers at risk printed under the x-axis.
-km_plot <- function(fit, title, x_label = "Years from index",
+km_plot <- function(fit, title, x_label = "Years from index", caption = NULL,
                     max_years = 10, risk_every_years = 2) {
   s <- summary(fit, censored = TRUE)
   strata <- if (is.null(s$strata)) rep("Overall", length(s$time)) else
@@ -82,11 +82,12 @@ km_plot <- function(fit, title, x_label = "Years from index",
     scale_x_continuous(breaks = risk_years, limits = c(-0.3, max_years + 0.3)) +
     scale_y_continuous(breaks = seq(0, 1, 0.25), labels = scales::percent) +
     coord_cartesian(ylim = c(0, 1), clip = "off") +
-    labs(title = title, x = x_label, y = "Survival", colour = NULL) +
+    labs(title = title, x = x_label, y = "Survival", colour = NULL, caption = caption) +
     theme_minimal(base_size = 11) +
     theme(
       legend.position = "top",
       axis.title.x = element_text(margin = margin(t = 4)),
+      plot.caption = element_text(size = 7, colour = "grey40"),
       plot.margin = margin(10, 10, 30 + 22 * length(groups), 10)
     )
 }
