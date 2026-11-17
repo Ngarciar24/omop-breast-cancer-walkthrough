@@ -1,0 +1,6 @@
+"codelist_name","class","n_concepts","n_flagged_for_review"
+"breast_cancer",NA,1949,770
+"treatment","anti_her2",583,NA
+"treatment","cdk46_inhibitor",243,NA
+"treatment","chemotherapy",13485,NA
+"treatment","endocrine_therapy",4909,NA

@@ -2,7 +2,247 @@
 title: "OMOP breast cancer walkthrough"
 author: "Ignacio Garcia Ribelles"
 format: html
+execute:
+  echo: false
 ---
 
 The report is filled in milestone by milestone. All data are synthetic (Synthea).
 No clinical conclusion may be drawn from them.
+
+```{r}
+library(gt)
+
+results <- function(file) read.csv(file.path("..", "results", file))
+
+row_counts  <- results("m1_row_counts.csv")
+obs_periods <- results("m1_observation_periods.csv")
+zero        <- results("m1_concept_id_zero.csv")
+dq          <- results("m1_dq_checks.csv")
+drug_dups   <- results("m1_drug_duplicate_detail.csv")
+
+n_rows <- function(table) row_counts$n_rows[row_counts$table_name == table]
+failing <- function(check, table) {
+  dq$rows_failing[dq$check_name == check & dq$table_name == table]
+}
+share <- function(check, table) {
+  dq$share_failing[dq$check_name == check & dq$table_name == table]
+}
+pct <- function(x) sprintf("%.1f%%", 100 * x)
+num <- function(x) format(x, big.mark = ",")
+```
+
+## Data exploration and quality (M1)
+
+### Row counts
+
+```{r}
+gt(row_counts) |>
+  cols_label(table_name = "Table", n_rows = "Rows", n_persons = "Persons") |>
+  fmt_integer(columns = c(n_rows, n_persons))
+```
+
+The `measurement` table holds `r num(n_rows("measurement"))` rows and the
+`observation` table `r num(n_rows("observation"))`. Nothing in this project can use
+laboratory values or observations from them.
+
+### Observation periods
+
+Every person has `r ifelse(obs_periods$n_persons_with_more_than_one_period == 0, "exactly one", "at least one")`
+observation period. The median length is `r num(obs_periods$median_length_days)` days.
+`r obs_periods$n_zero_length_periods` periods start and end on the same day.
+These people can never meet the 365 days of prior observation required in M3.
+
+### Unmapped records
+
+```{r}
+gt(zero) |>
+  cols_label(
+    table_name = "Table", concept_column = "Concept column",
+    n_rows = "Rows", n_concept_zero = "concept_id = 0",
+    share_concept_zero = "Share"
+  ) |>
+  fmt_integer(columns = c(n_rows, n_concept_zero)) |>
+  fmt_percent(columns = share_concept_zero, decimals = 2) |>
+  sub_missing(missing_text = "empty table")
+```
+
+### Data-quality checks
+
+Failing rows are counted and reported. The data are not changed.
+
+```{r}
+gt(dq[, c("check_name", "rule", "table_name", "rows_checked",
+          "rows_failing", "share_failing")]) |>
+  cols_label(
+    check_name = "Check", rule = "Rule", table_name = "Table",
+    rows_checked = "Rows checked", rows_failing = "Rows failing",
+    share_failing = "Share"
+  ) |>
+  fmt_integer(columns = c(rows_checked, rows_failing)) |>
+  fmt_percent(columns = share_failing, decimals = 2)
+```
+
+`r pct(share("duplicate_records", "drug_exposure"))` of drug records
+(`r num(failing("duplicate_records", "drug_exposure"))` rows) repeat an earlier
+row with the same person, drug, start date and type. They fall into
+`r num(drug_dups$n_duplicate_groups)` groups of up to
+`r drug_dups$max_rows_in_one_group` rows. Within a group the rows differ in
+visit in `r drug_dups$groups_differing_in_visit` groups, in end date in
+`r drug_dups$groups_differing_in_end_date`, in start time in
+`r drug_dups$groups_differing_in_start_time`, in quantity in
+`r drug_dups$groups_differing_in_quantity` and in source value in
+`r drug_dups$groups_differing_in_source_value`. On the columns compared they
+are copies. They do not move the date of a first treatment. They would
+inflate any count of drug exposures.
+
+`r failing("events_outside_observation", "condition_occurrence")` condition
+records start outside the person's observation period.
+
+## Concept sets and terminology mapping (M2)
+
+```{r}
+codelist_summary <- results("m2_codelist_summary.csv")
+review           <- results("m2_breast_cancer_review.csv")
+bc_counts        <- results("m2_breast_cancer_counts.csv")
+treatment_counts <- results("m2_treatment_counts.csv")
+mapping          <- results("m2_source_to_standard.csv")
+icd              <- results("m2_icd_vocabularies.csv")
+not_found        <- results("m2_ingredients_not_found.csv")
+bc_definition    <- read.csv(file.path("..", "codelists", "breast_cancer_definition.csv"))
+icd10cm_map      <- read.csv(file.path("..", "codelists", "breast_cancer_icd10cm_map.csv"))
+
+icd_row <- function(id) icd[icd$vocabulary_id == id, ]
+```
+
+Every concept was found by a query saved in `sql/codelists/`. No concept_id is
+typed by hand. The vocabulary version is `r bc_definition$vocabulary_version[1]`.
+
+### Concept sets
+
+The breast cancer set is the SNOMED concept
+"`r bc_definition$concept_name`" and all its descendants. The drug sets are the
+descendants of RxNorm ingredients listed by name in
+`codelists/treatment_classes_input.csv`.
+`r if (nrow(not_found) == 0) "Every listed ingredient was found." else paste("Not found:", paste(not_found$ingredient_name, collapse = ", "))`
+
+```{r}
+gt(codelist_summary) |>
+  cols_label(codelist_name = "Codelist", class = "Class",
+             n_concepts = "Concepts", n_flagged_for_review = "Flagged for review") |>
+  fmt_integer(columns = n_concepts) |>
+  sub_missing(missing_text = "")
+```
+
+The hierarchy below the parent also holds concepts that are not primary breast
+cancer. They stay in the set and are flagged by a name rule in
+`R/20_codelists.R`.
+
+```{r}
+gt(review) |>
+  cols_label(review_reason = "Reason", n_concepts = "Concepts")
+```
+
+Only `r nrow(bc_counts)` concept of the set occurs in the data,
+"`r bc_counts$concept_name[1]`", in `r num(bc_counts$n_persons[1])` people.
+The flagged concepts therefore change nothing in this dataset. They would matter
+in real data.
+
+### Treatment among people with breast cancer
+
+People with a breast cancer record at any time, and their drug records from each
+class at any time. These counts are not yet tied to the index date, which M3 sets.
+Record counts include the duplicate drug rows found in M1.
+
+```{r}
+classes <- treatment_counts[treatment_counts$level == "class",
+                            c("class", "n_persons", "n_records")]
+gt(classes) |>
+  cols_label(class = "Class", n_persons = "Persons", n_records = "Records") |>
+  fmt_integer(columns = c(n_persons, n_records))
+```
+
+### Source to standard
+
+```{r}
+gt(mapping) |>
+  cols_label(
+    table_name = "Table", source_vocabulary_id = "Source vocabulary",
+    standard_vocabulary_id = "Standard vocabulary", n_records = "Records",
+    n_source_concepts = "Source concepts", n_standard_concepts = "Standard concepts",
+    n_source_equals_standard = "Source is standard",
+    n_confirmed_by_maps_to = "Confirmed by Maps to"
+  ) |>
+  fmt_integer(columns = starts_with("n_"))
+```
+
+Synthea records conditions in SNOMED and drugs in RxNorm. Both are already
+standard, so here every source concept maps to itself.
+
+### ICD-10
+
+WHO ICD-10 is `r ifelse(icd_row("ICD10")$loaded == "yes", "loaded", "not loaded")`
+in this vocabulary. ICD-10-CM is `r ifelse(icd_row("ICD10CM")$loaded == "yes", "loaded", "not loaded")`
+(`r icd_row("ICD10CM")$vocabulary_version`, `r num(icd_row("ICD10CM")$n_concepts)` concepts).
+The data hold `r icd_row("ICD10CM")$n_condition_records_in_data` condition
+records with an ICD-10-CM source code.
+
+The ICD-10-CM mapping below comes from the vocabulary alone, not from the data.
+`r length(unique(icd10cm_map$icd10cm_code[icd10cm_map$in_breast_cancer_set == 1]))` ICD-10-CM codes map into the breast
+cancer set through "Maps to". `r length(unique(icd10cm_map$icd10cm_code[icd10cm_map$in_breast_cancer_set == 0]))` codes
+in the C50 category map somewhere outside it. The full list is in
+`codelists/breast_cancer_icd10cm_map.csv`.
+
+## Cohort (M3)
+
+```{r}
+attrition_sql <- results("m3_attrition_sql.csv")
+attrition_cc  <- results("m3_attrition_cohortconstructor.csv")
+cohort_sum    <- results("m3_cohort_summary.csv")
+
+summary_value <- function(variable, level = "") {
+  cohort_sum$value[cohort_sum$variable == variable & cohort_sum$level == level]
+}
+```
+
+The index date is the first breast cancer record inside an observation period.
+People need at least 365 days of observation before it and must be 18 or older
+on it. Sex is recorded and not filtered on. The cohort ends at the end of the
+observation period.
+
+The cohort is built twice, once with the SQL in `sql/cohort/` and once with
+CohortConstructor in `R/30_cohort.R`. A test checks that both give the same
+people with the same start and end dates.
+
+### Attrition
+
+```{r}
+gt(attrition_sql) |>
+  cols_label(step = "Step", description = "Step description",
+             n_persons = "Persons", n_records = "Records") |>
+  fmt_integer(columns = c(n_persons, n_records))
+```
+
+CohortConstructor records its own steps, with more detail.
+
+```{r}
+gt(attrition_cc[, c("reason", "number_subjects", "number_records")]) |>
+  cols_label(reason = "Step", number_subjects = "Persons",
+             number_records = "Records") |>
+  fmt_integer(columns = c(number_subjects, number_records))
+```
+
+The prior-observation rule removes
+`r num(summary_value("excluded_for_prior_observation", "persons"))` people.
+`r num(summary_value("excluded_for_prior_observation", "with_0_prior_days"))` of
+them have their breast cancer record on the first day of their observation
+period, with no observation before it. The median prior observation among the
+people removed is `r summary_value("excluded_for_prior_observation", "median_prior_days")` days.
+
+### The cohort
+
+The cohort holds `r num(summary_value("persons"))` people:
+`r summary_value("sex", "FEMALE")` female and `r summary_value("sex", "MALE")` male.
+Median age at index is `r summary_value("age_at_index", "median")` years
+(range `r summary_value("age_at_index", "min")` to `r summary_value("age_at_index", "max")`).
+Index dates fall between `r summary_value("index_year", "min")` and
+`r summary_value("index_year", "max")`.

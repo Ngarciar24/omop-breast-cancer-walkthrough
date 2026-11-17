@@ -1,5 +1,7 @@
 # ---------------------------------------------------------------------------
-# cdm.R: open the synthetic OMOP CDM and describe where it came from
+# cdm.R
+#
+# Open the synthetic OMOP CDM and describe where it came from.
 #
 # The data are Synthea records in the OMOP Common Data Model, shipped by
 # CDMConnector as a DuckDB database. They are synthetic. No clinical conclusion

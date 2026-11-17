@@ -1,0 +1,2 @@
+"n_persons","n_periods","n_persons_with_more_than_one_period","n_zero_length_periods","min_length_days","median_length_days","max_length_days","earliest_start","latest_end"
+10751,10751,0,9,0,3325,33110,1925-01-13,2023-06-20

@@ -1,5 +1,7 @@
 # ---------------------------------------------------------------------------
-# run_all.R: rebuild every step from the OMOP data, then run the tests
+# run_all.R
+#
+# Rebuild every step from the OMOP data, then run the tests.
 #
 #   Rscript run_all.R
 #

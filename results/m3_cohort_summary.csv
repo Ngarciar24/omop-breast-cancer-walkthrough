@@ -1,0 +1,12 @@
+"variable","level","value"
+"persons","",124
+"sex","FEMALE",107
+"sex","MALE",17
+"age_at_index","median",63.5
+"age_at_index","min",24
+"age_at_index","max",84
+"index_year","min",1969
+"index_year","max",2022
+"excluded_for_prior_observation","persons",154
+"excluded_for_prior_observation","median_prior_days",0
+"excluded_for_prior_observation","with_0_prior_days",143

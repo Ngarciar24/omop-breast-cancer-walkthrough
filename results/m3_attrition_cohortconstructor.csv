@@ -1,0 +1,9 @@
+"cohort_definition_id","number_records","number_subjects","reason_id","reason","excluded_records","excluded_subjects"
+1,278,278,1,"Initial qualifying events",0,0
+1,278,278,2,"Record in observation",0,0
+1,278,278,3,"Not missing record date",0,0
+1,278,278,4,"Merge overlapping records",0,0
+1,278,278,5,"Restricted to first entry",0,0
+1,124,124,6,"Prior observation requirement: 365 days",154,154
+1,124,124,7,"Age requirement: 18 to Inf",0,0
+1,124,124,8,"Exit at observation period end date, limited to current observation period",0,0

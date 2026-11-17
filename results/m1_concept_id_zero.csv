@@ -1,0 +1,8 @@
+"table_name","concept_column","n_rows","n_concept_zero","share_concept_zero"
+"visit_occurrence","visit_concept_id",242584,0,0
+"condition_occurrence","condition_concept_id",4304,0,0
+"drug_exposure","drug_concept_id",333336,0,0
+"procedure_occurrence","procedure_concept_id",25137,0,0
+"measurement","measurement_concept_id",0,0,NA
+"observation","observation_concept_id",0,0,NA
+"device_exposure","device_concept_id",1289,0,0
