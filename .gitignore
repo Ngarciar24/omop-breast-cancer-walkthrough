@@ -1,0 +1,27 @@
+# renv
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Local settings, including EUNOMIA_DATA_FOLDER
+.Renviron
+
+# Data never goes into git: downloads, DuckDB files, extracts
+data/
+*.duckdb
+*.duckdb.wal
+*.zip
+
+# Quarto build output
+report/_site/
+report/*_files/
+report/.quarto/

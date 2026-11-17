@@ -1,0 +1,3 @@
+# Copy this file to .Renviron and set an absolute path.
+# The Synthea dataset is downloaded into this folder on the first run.
+EUNOMIA_DATA_FOLDER=/absolute/path/to/omop-breast-cancer-walkthrough/data/eunomia

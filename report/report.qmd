@@ -1,0 +1,8 @@
+---
+title: "OMOP breast cancer walkthrough"
+author: "Ignacio Garcia Ribelles"
+format: html
+---
+
+The report is filled in milestone by milestone. All data are synthetic (Synthea).
+No clinical conclusion may be drawn from them.
