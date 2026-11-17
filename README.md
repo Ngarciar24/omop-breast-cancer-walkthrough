@@ -119,3 +119,8 @@ builds ADaM datasets from the public CDISC pilot SDTM data with
 ## Licence
 
 MIT.
+
+## How it was made
+
+Built with Claude Code. Every step was reviewed and run by Ignacio
+Garcia Ribelles.
