@@ -19,4 +19,4 @@ INNER JOIN codelist_concepts cc
 INNER JOIN concept c
   ON c.concept_id = cc.concept_id
 GROUP BY cc.concept_id, c.concept_name, c.vocabulary_id
-ORDER BY n_persons DESC
+ORDER BY n_persons DESC, cc.concept_id

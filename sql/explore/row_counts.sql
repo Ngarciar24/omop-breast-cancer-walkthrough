@@ -44,3 +44,6 @@ FROM observation
 UNION ALL
 SELECT 'device_exposure', COUNT(*), COUNT(DISTINCT person_id)
 FROM device_exposure
+
+-- UNION ALL does not promise an order, so sort the rows.
+ORDER BY table_name

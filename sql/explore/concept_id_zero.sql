@@ -40,3 +40,6 @@ UNION ALL
 SELECT 'device_exposure', 'device_concept_id', COUNT(*),
        COALESCE(SUM(CASE WHEN device_concept_id = 0 THEN 1 ELSE 0 END), 0)
 FROM device_exposure
+
+-- UNION ALL does not promise an order, so sort the rows.
+ORDER BY table_name

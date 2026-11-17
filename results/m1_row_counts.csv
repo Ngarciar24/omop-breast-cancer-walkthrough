@@ -1,11 +1,11 @@
 "table_name","n_rows","n_persons"
-"person",10751,10751
-"observation_period",10751,10751
-"death",751,751
-"visit_occurrence",242584,10751
 "condition_occurrence",4304,2861
+"death",751,751
+"device_exposure",1289,1081
 "drug_exposure",333336,10751
-"procedure_occurrence",25137,1933
 "measurement",0,0
 "observation",0,0
-"device_exposure",1289,1081
+"observation_period",10751,10751
+"person",10751,10751
+"procedure_occurrence",25137,1933
+"visit_occurrence",242584,10751

@@ -56,4 +56,4 @@ LEFT JOIN concept_relationship cr
  AND cr.relationship_id = 'Maps to'
  AND cr.invalid_reason IS NULL
 GROUP BY r.table_name, src.vocabulary_id, std.vocabulary_id
-ORDER BY r.table_name, n_records DESC
+ORDER BY r.table_name, n_records DESC, source_vocabulary_id, standard_vocabulary_id

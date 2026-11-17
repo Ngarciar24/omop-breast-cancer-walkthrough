@@ -37,4 +37,6 @@ INNER JOIN concept anc
 WHERE c.standard_concept = 'S'
   AND c.invalid_reason IS NULL
   AND c.domain_id = anc.domain_id
-ORDER BY a.codelist_name, a.class, ca.min_levels_of_separation, c.concept_name
+-- concept_id comes last so that rows with the same name keep a fixed order.
+ORDER BY a.codelist_name, a.class, ca.min_levels_of_separation, c.concept_name,
+         c.concept_id, a.ancestor_concept_id

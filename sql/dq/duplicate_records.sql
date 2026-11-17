@@ -41,3 +41,6 @@ SELECT 'duplicate_records',
        COALESCE(SUM(n), 0),
        COALESCE(SUM(n - 1), 0)
 FROM drug_groups
+
+-- UNION ALL does not promise an order, so sort the rows.
+ORDER BY table_name
