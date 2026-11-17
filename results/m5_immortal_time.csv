@@ -1,9 +1,0 @@
-"analysis","strata","time_days","n_risk","n_event_cumulative","survival","lower_95","upper_95","years"
-"Naive, from index","Ever treated",730.5,78,13,0.865991355274908,0.800650497488097,0.936664661751517,2
-"Naive, from index","Ever treated",1826.25,29,39,0.511361550668134,0.408624309059216,0.639929220324051,5
-"Naive, from index","Never treated",730.5,23,1,0.958333333333333,0.881631402331465,1,2
-"Naive, from index","Never treated",1826.25,23,1,0.958333333333333,0.881631402331465,1,5
-"Landmark at day 90, from day 90","Not treated by day 90",730.5,24,0,1,1,1,2
-"Landmark at day 90, from day 90","Not treated by day 90",1826.25,24,0,1,1,1,5
-"Landmark at day 90, from day 90","Treated by day 90",730.5,73,15,0.838934912394821,0.76725911325558,0.917306520151375,2
-"Landmark at day 90, from day 90","Treated by day 90",1826.25,25,38,0.509709742028746,0.405611457918518,0.640524364011437,5

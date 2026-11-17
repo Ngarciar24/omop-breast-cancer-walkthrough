@@ -333,23 +333,32 @@ gt(dictionary_rows, groupname_col = "Dataset")
 ## Analyses (M5)
 
 ```{r}
-table1     <- results("m5_table1.csv")
-km_os      <- results("m5_km_os.csv")
-comparison <- results("m5_survival_comparison.csv")
-immortal   <- results("m5_immortal_time.csv")
-it_groups  <- results("m5_immortal_time_groups.csv")
+# Tables in this section come from the Analysis Results Data written in M6,
+# never from patient-level data. The helpers only reshape ARD rows.
+source(file.path("..", "R", "survival_helpers.R"))
+source(file.path("..", "R", "ard_helpers.R"))
+
+read_ard <- function(file) {
+  as.data.frame(arrow::read_parquet(file.path("..", "results", "ard", file)))
+}
+ard_table1   <- read_ard("m6_table1_ard.parquet")
+ard_survival <- read_ard("m6_survival_ard.parquet")
+comparison   <- results("m5_survival_comparison.csv")
 
 figure <- function(file) knitr::include_graphics(file.path("..", "results", "figures", file))
 
+naive    <- survival_analyses[["naive"]]
+landmark <- survival_analyses[["landmark"]]
+immortal <- rbind(
+  cbind(analysis = naive, survival_table_from_ard(ard_survival, naive)),
+  cbind(analysis = landmark, survival_table_from_ard(ard_survival, landmark))
+)
 it_value <- function(analysis, strata, years, column = "survival") {
   immortal[[column]][immortal$analysis == analysis & immortal$strata == strata &
                        immortal$years == years]
 }
-it_n <- function(analysis, strata) {
-  it_groups$n_persons[it_groups$analysis == analysis & it_groups$strata == strata]
-}
-naive <- "Naive, from index"
-landmark <- "Landmark at day 90, from day 90"
+# The number at risk at time 0 is the size of the group.
+it_n <- function(analysis, strata) it_value(analysis, strata, 0, "n_risk")
 p3 <- function(x) sprintf("%.3f", x)
 ```
 
@@ -361,8 +370,7 @@ no clinical conclusion. The groups are small, so the estimates are imprecise.
 Median (25th, 75th percentile) for numbers, n (%) for categories.
 
 ```{r}
-gt(table1) |>
-  sub_missing(missing_text = "")
+gt(table1_from_ard(ard_table1))
 ```
 
 ### Overall survival
@@ -378,6 +386,10 @@ figure("m5_km_os_by_treatment.png")
 ```
 
 ```{r}
+km_os <- rbind(
+  survival_table_from_ard(ard_survival, survival_analyses[["overall"]]),
+  survival_table_from_ard(ard_survival, survival_analyses[["by_treatment"]])
+)
 gt(km_os[, c("strata", "years", "n_risk", "survival", "lower_95", "upper_95")]) |>
   cols_label(strata = "Group", years = "Years", n_risk = "At risk",
              survival = "Survival", lower_95 = "Lower 95% CI",
@@ -430,8 +442,9 @@ figure("m5_os_landmark.png")
 ```
 
 ```{r}
-gt(immortal[, c("analysis", "strata", "years", "n_risk", "survival",
-                "lower_95", "upper_95")], groupname_col = "analysis") |>
+gt(immortal[immortal$years %in% c(0, 2, 5),
+            c("analysis", "strata", "years", "n_risk", "survival",
+              "lower_95", "upper_95")], groupname_col = "analysis") |>
   cols_label(strata = "Group", years = "Years", n_risk = "At risk",
              survival = "Survival", lower_95 = "Lower 95% CI",
              upper_95 = "Upper 95% CI") |>
@@ -453,3 +466,30 @@ people die or leave observation within the first 90 days, so there is little
 immortal time to misclassify. The people never treated in this synthetic data
 also differ from the treated in ways the data do not describe, so the groups
 are not comparable in either analysis.
+
+## Analysis Results Data (M6)
+
+The Table 1 statistics and the survival estimates above are stored as
+Analysis Results Data (ARD) in `results/ard/`, as Parquet and CSV. Each row
+holds one statistic, with its group, variable, statistic name, value and
+formatted text. They were computed with `cards` (Table 1) and `cardx`
+(survival). The tables in the M5 section only reshape these rows, and a test
+checks that every number in those tables equals the matching ARD value.
+
+```{r}
+ard_counts <- data.frame(
+  file = c("m6_table1_ard", "m6_survival_ard"),
+  rows = c(nrow(ard_table1), nrow(ard_survival)),
+  statistics = c(paste(unique(ard_table1$stat_name), collapse = ", "),
+                 paste(unique(ard_survival$stat_name[ard_survival$variable == "time"]),
+                       collapse = ", "))
+)
+gt(ard_counts) |>
+  cols_label(file = "ARD", rows = "Rows", statistics = "Statistics")
+```
+
+A few rows of the Table 1 ARD, as stored.
+
+```{r}
+gt(head(ard_table1[ard_table1$variable == "AGE", ], 6))
+```

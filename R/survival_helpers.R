@@ -90,3 +90,41 @@ km_plot <- function(fit, title, x_label = "Years from index",
       plot.margin = margin(10, 10, 30 + 22 * length(groups), 10)
     )
 }
+
+# --- Shared fits ----------------------------------------------------------
+# M5 draws these fits and M6 stores their estimates as ARD. Building them in
+# one place keeps the two steps in agreement.
+
+treatment_levels <- c("Anti-HER2 based", "CDK4/6 inhibitor based", "Chemotherapy",
+                      "Endocrine only", "None within 90 days")
+
+survival_analyses <- c(
+  overall      = "Overall survival, all people",
+  by_treatment = "Overall survival by first treatment group",
+  naive        = "Naive, from index",
+  landmark     = "Landmark at day 90, from day 90"
+)
+
+os_fits <- function(adsl, adtte, landmark_day = 90) {
+  os <- merge(adtte[adtte$PARAMCD == "OS", ], adsl[, c("USUBJID", "FTRTCLS")],
+              by = "USUBJID")
+  os$FTRTCLS <- factor(os$FTRTCLS, levels = treatment_levels)
+
+  # Naive grouping. "Ever treated" uses the whole follow-up, including the time
+  # after index that a person had to survive before treatment started.
+  ttft <- adtte[adtte$PARAMCD == "TTFT", c("USUBJID", "CNSR")]
+  naive <- merge(os, ttft, by = "USUBJID", suffixes = c("", "_TTFT"))
+  naive$group <- ifelse(naive$CNSR_TTFT == 0, "Ever treated", "Never treated")
+
+  # Landmark grouping. Only people still at risk after the landmark, grouped
+  # by what they had received by then, followed from the landmark.
+  landmark <- landmark_data(adsl, adtte, day = landmark_day)
+
+  # Surv() wants 1 for an event. ADaM CNSR is 1 for censored, so use 1 - CNSR.
+  list(
+    overall      = survfit(Surv(AVAL, 1 - CNSR) ~ 1, data = os),
+    by_treatment = survfit(Surv(AVAL, 1 - CNSR) ~ FTRTCLS, data = os),
+    naive        = survfit(Surv(AVAL, 1 - CNSR) ~ group, data = naive),
+    landmark     = survfit(Surv(AVAL_LM, 1 - CNSR) ~ group, data = landmark)
+  )
+}
